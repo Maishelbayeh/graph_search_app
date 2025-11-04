@@ -195,73 +195,46 @@ class GraphSearchVisualizer:
         fig, ax = plt.subplots(figsize=(14, 9), dpi=100)
         fig.patch.set_facecolor('white')
         
-        # Draw solution path edges first with enhanced styling
+        # Draw solution path edges first (if provided) with thicker red lines
         if highlight_path_edges:
             path_edge_list = list(zip(highlight_path_edges[:-1], highlight_path_edges[1:]))
             nx.draw_networkx_edges(self.graph, self.pos, ax=ax,
                                   edgelist=path_edge_list,
-                                  edge_color='#E53935', width=6, alpha=0.95, style='solid',
-                                  arrows=True, arrowsize=25, arrowstyle='->', connectionstyle='arc3,rad=0.1')
+                                  edge_color='#D32F2F', width=5, alpha=0.9, style='solid',
+                                  arrows=True, arrowsize=20, arrowstyle='->')
         
-        # Draw all edges with professional styling
+        # Draw all edges - better styling
         nx.draw_networkx_edges(self.graph, self.pos, ax=ax, 
-                              edge_color='#757575', width=3, alpha=0.6, style='solid',
-                              connectionstyle='arc3,rad=0.1')
+                              edge_color='#666666', width=2.5, alpha=0.7, style='solid')
         
-        # Draw nodes with professional color scheme
-        # Priority: current > path > start/goal > intersection > forward/backward > visited > unvisited
+        # Draw nodes - matching graph_search_visualizer.py design
         node_colors = []
-        node_sizes = []
-        node_edgewidths = []
-        
         for node in self.graph.nodes():
-            if highlight_current and node == highlight_current:
-                # Current node being explored - make it stand out
-                node_colors.append('#FFC107')  # Bright amber
-                node_sizes.append(3200)  # Larger size
-                node_edgewidths.append(4)  # Thicker border
-            elif highlight_path and node in highlight_path:
-                # Solution path nodes
-                node_colors.append('#F44336')  # Red
-                node_sizes.append(2800)
-                node_edgewidths.append(3)
-            elif node == self.start_node or node == self.goal_node:
-                # Start and goal nodes
-                node_colors.append('#FF6B35')  # Vibrant orange
-                node_sizes.append(2800)
-                node_edgewidths.append(3)
+            if node == self.start_node:
+                node_colors.append('#FF8C00')  # Orange for start
+            elif node == self.goal_node:
+                node_colors.append('#FF8C00')  # Orange for goal
+            # Bidirectional search - intersection node (visited by both)
             elif (forward_visited and node in forward_visited and 
                   backward_visited and node in backward_visited):
-                # Intersection in bidirectional search
-                node_colors.append('#9C27B0')  # Purple
-                node_sizes.append(2800)
-                node_edgewidths.append(3)
+                node_colors.append('#FF1493')  # Deep pink for intersection
+            # Bidirectional search - different colors for forward and backward
             elif forward_visited and node in forward_visited:
-                # Forward search nodes
-                node_colors.append('#2196F3')  # Blue
-                node_sizes.append(2800)
-                node_edgewidths.append(2.5)
+                node_colors.append('#4169E1')  # Royal blue for forward search
             elif backward_visited and node in backward_visited:
-                # Backward search nodes
-                node_colors.append('#4CAF50')  # Green
-                node_sizes.append(2800)
-                node_edgewidths.append(2.5)
+                node_colors.append('#32CD32')  # Lime green for backward search
             elif highlight_visited and node in highlight_visited:
-                # Visited nodes
-                node_colors.append('#66BB6A')  # Light green
-                node_sizes.append(2800)
-                node_edgewidths.append(2.5)
+                node_colors.append('#90EE90')  # Light green for visited
+            elif highlight_current and node == highlight_current:
+                node_colors.append('#FFD700')  # Gold for current
+            elif highlight_path and node in highlight_path:
+                node_colors.append('#FF6347')  # Tomato red for solution path
             else:
-                # Unvisited nodes
-                node_colors.append('#90CAF9')  # Light blue
-                node_sizes.append(2800)
-                node_edgewidths.append(2.5)
+                node_colors.append('#87CEEB')  # Light blue for unvisited
         
-        # Draw nodes with varying sizes and edge widths
-        for i, node in enumerate(self.graph.nodes()):
-            nx.draw_networkx_nodes(self.graph, self.pos, ax=ax, nodelist=[node],
-                                  node_color=[node_colors[i]], node_size=node_sizes[i],
-                                  alpha=0.95, edgecolors='#212121', linewidths=node_edgewidths[i])
+        nx.draw_networkx_nodes(self.graph, self.pos, ax=ax,
+                              node_color=node_colors, node_size=2500,
+                              alpha=0.98, edgecolors='black', linewidths=3)
         
         # Create mapping for visited nodes
         visited_order_map = {}
@@ -289,47 +262,25 @@ class GraphSearchVisualizer:
             labels[node] = label_text
         
         nx.draw_networkx_labels(self.graph, self.pos, labels, ax=ax,
-                               font_size=15, font_weight='bold', 
-                               font_color='#FFFFFF', font_family='Arial')
+                               font_size=14, font_weight='bold', 
+                               font_color='white', font_family='Arial')
         
-        # Draw visit numbers above visited nodes with improved professional design
+        # Draw visit numbers above visited nodes - matching graph_search_visualizer.py design
         if visited_order_map:
             for node in visited_order_map.keys():
                 x, y = self.pos[node]
                 visit_num = visited_order_map[node]
-                
-                # Calculate optimal position above node (avoid overlap with labels)
-                # Position at 0.75 units above node center for better spacing
-                badge_y = y + 0.75
-                
-                # Create a professional badge design
-                # Outer circle - white border
-                outer_circle = Circle((x, badge_y), 0.22, color='#FFFFFF', fill=True, 
-                                     zorder=5, linewidth=0, alpha=0.95)
-                ax.add_patch(outer_circle)
-                
-                # Inner circle - colored badge
-                inner_circle = Circle((x, badge_y), 0.19, color='#E53935', fill=True, 
-                                     zorder=6, linewidth=0)
-                ax.add_patch(inner_circle)
-                
-                # Add subtle shadow effect
-                shadow_circle = Circle((x + 0.02, badge_y - 0.02), 0.19, 
-                                     color='#B71C1C', fill=True, 
-                                     zorder=4, alpha=0.3)
-                ax.add_patch(shadow_circle)
-                
-                # Draw number text with better styling
-                ax.text(x, badge_y, str(visit_num), fontsize=12, fontweight='bold',
-                       color='#FFFFFF', ha='center', va='center', zorder=7,
-                       family='Arial', style='normal')
-                
-                # Add a subtle connecting line to node for better visual connection
-                ax.plot([x, x], [y + 0.45, badge_y - 0.19], 
-                       color='#BDBDBD', linewidth=1.5, alpha=0.4, 
-                       linestyle='--', zorder=3, dashes=(3, 2))
+                # Draw visit number in a circle above the node
+                circle = Circle((x, y + 0.4), 0.18, color='#D32F2F', fill=True, 
+                              zorder=5, edgecolor='white', linewidth=2)
+                ax.add_patch(circle)
+                ax.text(x, y + 0.4, str(visit_num), fontsize=11, fontweight='bold',
+                       color='white', ha='center', va='center', zorder=6)
+                # Draw X mark next to the number
+                ax.text(x + 0.3, y + 0.4, '✕', fontsize=18, fontweight='bold',
+                       color='#D32F2F', ha='center', va='center', zorder=6)
         
-        # Add legend
+        # Add legend - matching graph_search_visualizer.py design
         legend_elements = []
         if forward_visited or backward_visited:
             legend_elements = [
@@ -352,14 +303,14 @@ class GraphSearchVisualizer:
         
         if legend_elements:
             ax.legend(handles=legend_elements, loc='upper left', 
-                     fontsize=11, framealpha=0.98, fancybox=True,
-                     shadow=True, edgecolor='#BDBDBD', facecolor='#FAFAFA',
-                     frameon=True, borderpad=0.8, labelspacing=0.8)
+                     fontsize=10, framealpha=0.95, fancybox=True,
+                     shadow=True, edgecolor='#333333', facecolor='white')
         
-        ax.set_title('Graph Search Visualization', fontsize=18, fontweight='600', 
-                    pad=20, color='#424242', fontfamily='Arial')
+        ax.set_title('🔍 Graph Search Visualizer', fontsize=20, fontweight='bold', 
+                    pad=25, color='#1976D2', fontfamily='Arial')
         ax.axis('off')
-        ax.set_facecolor('#FFFFFF')
+        # Add subtle background
+        ax.set_facecolor('#FAFAFA')
         
         plt.tight_layout()
         return fig
@@ -398,6 +349,7 @@ with st.sidebar:
         st.session_state.animation_step = 0
         st.session_state.animation_complete = False
         st.session_state.current_animation_node = None
+        st.session_state.animation_thread_running = False
         if 'full_visited_order' in st.session_state:
             del st.session_state['full_visited_order']
         if 'full_solution_path' in st.session_state:
@@ -417,6 +369,7 @@ with st.sidebar:
         st.session_state.animation_step = 0
         st.session_state.animation_complete = False
         st.session_state.current_animation_node = None
+        st.session_state.animation_thread_running = False
         if 'full_visited_order' in st.session_state:
             del st.session_state['full_visited_order']
         if 'full_solution_path' in st.session_state:
@@ -476,6 +429,7 @@ with st.sidebar:
         st.session_state.animation_step = 0
         st.session_state.animation_complete = False
         st.session_state.current_animation_node = None
+        st.session_state.animation_thread_running = False
         if 'full_visited_order' in st.session_state:
             del st.session_state['full_visited_order']
         if 'full_solution_path' in st.session_state:
@@ -643,6 +597,7 @@ with col1:
                 if not st.session_state.get('auto_play_initialized', False):
                     st.session_state.auto_play = True
                     st.session_state.auto_play_initialized = True
+                    st.session_state.animation_thread_running = False
                 
     
     # Create graph placeholder for animation
@@ -697,15 +652,28 @@ with col1:
         st.pyplot(fig, use_container_width=True, clear_figure=True)
     
     # Handle auto-play animation after graph is shown
+    # Use Streamlit's native rerun mechanism without threading
     if st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
         full_visited_order = st.session_state.get('full_visited_order', [])
         animation_step = st.session_state.get('animation_step', 0)
         
         if st.session_state.get('auto_play', False) and animation_step < len(full_visited_order) - 1:
-            # Advance to next step after showing current frame
-            time.sleep(1.2)  # Visible delay
-            st.session_state.animation_step += 1
-            st.rerun()
+            # Use a simple counter-based approach
+            # The animation will advance on next rerun
+            if 'last_animation_time' not in st.session_state:
+                st.session_state.last_animation_time = time.time()
+            
+            # Check if enough time has passed (1.2 seconds)
+            current_time = time.time()
+            if current_time - st.session_state.last_animation_time >= 1.2:
+                st.session_state.animation_step += 1
+                st.session_state.last_animation_time = current_time
+                st.rerun()
+            else:
+                # Schedule a rerun after remaining time
+                remaining_time = 1.2 - (current_time - st.session_state.last_animation_time)
+                time.sleep(min(remaining_time, 0.1))  # Small sleep to avoid busy loop
+                st.rerun()
     
     # Algorithm info
     if visited_order:
