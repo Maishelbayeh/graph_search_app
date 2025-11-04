@@ -15,22 +15,78 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Professional CSS styling for AI Master's level design
 st.markdown("""
     <style>
+    /* Main Header */
     .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1976D2;
+        font-size: 2.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-align: center;
-        padding: 1rem 0;
+        padding: 1.5rem 0;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
     }
+    
+    /* Button Styling */
     .stButton>button {
         width: 100%;
-        height: 3rem;
+        height: 3.2rem;
         font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 0.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Sidebar Styling */
+    .css-1d391kg {
+        background-color: #f8f9fa;
+    }
+    
+    /* Main Container */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    /* Info Boxes */
+    .stInfo {
+        background-color: #e8f4f8;
+        border-left: 4px solid #2196F3;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+    
+    /* Success Messages */
+    .stSuccess {
+        background-color: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+    
+    /* Code Blocks */
+    .stCodeBlock {
+        background-color: #f5f5f5;
+        border-radius: 6px;
+        padding: 1rem;
+    }
+    
+    /* Footer */
+    footer {
+        text-align: center;
+        color: #666;
+        padding: 1rem 0;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -73,44 +129,45 @@ class GraphSearchVisualizer:
         """Draw the graph with optional highlighting"""
         fig, ax = plt.subplots(figsize=(12, 8))
         
-        # Draw solution path edges first
+        # Draw solution path edges first with enhanced styling
         if highlight_path_edges:
             path_edge_list = list(zip(highlight_path_edges[:-1], highlight_path_edges[1:]))
             nx.draw_networkx_edges(self.graph, self.pos, ax=ax,
                                   edgelist=path_edge_list,
-                                  edge_color='#D32F2F', width=5, alpha=0.9, style='solid',
-                                  arrows=True, arrowsize=20, arrowstyle='->')
+                                  edge_color='#E53935', width=6, alpha=0.95, style='solid',
+                                  arrows=True, arrowsize=25, arrowstyle='->', connectionstyle='arc3,rad=0.1')
         
-        # Draw all edges
+        # Draw all edges with professional styling
         nx.draw_networkx_edges(self.graph, self.pos, ax=ax, 
-                              edge_color='#666666', width=2.5, alpha=0.7, style='solid')
+                              edge_color='#757575', width=3, alpha=0.6, style='solid',
+                              connectionstyle='arc3,rad=0.1')
         
-        # Draw nodes
+        # Draw nodes with professional color scheme
         node_colors = []
         for node in self.graph.nodes():
             if node == self.start_node:
-                node_colors.append('#FF8C00')
+                node_colors.append('#FF6B35')  # Vibrant orange for start
             elif node == self.goal_node:
-                node_colors.append('#FF8C00')
+                node_colors.append('#FF6B35')  # Vibrant orange for goal
             elif (forward_visited and node in forward_visited and 
                   backward_visited and node in backward_visited):
-                node_colors.append('#FF1493')
+                node_colors.append('#9C27B0')  # Purple for intersection
             elif forward_visited and node in forward_visited:
-                node_colors.append('#4169E1')
+                node_colors.append('#2196F3')  # Blue for forward search
             elif backward_visited and node in backward_visited:
-                node_colors.append('#32CD32')
+                node_colors.append('#4CAF50')  # Green for backward search
             elif highlight_visited and node in highlight_visited:
-                node_colors.append('#90EE90')
+                node_colors.append('#66BB6A')  # Light green for visited
             elif highlight_current and node == highlight_current:
-                node_colors.append('#FFD700')
+                node_colors.append('#FFC107')  # Amber for current
             elif highlight_path and node in highlight_path:
-                node_colors.append('#FF6347')
+                node_colors.append('#F44336')  # Red for solution path
             else:
-                node_colors.append('#87CEEB')
+                node_colors.append('#90CAF9')  # Light blue for unvisited
         
         nx.draw_networkx_nodes(self.graph, self.pos, ax=ax,
-                              node_color=node_colors, node_size=2500,
-                              alpha=0.98, edgecolors='black', linewidths=3)
+                              node_color=node_colors, node_size=2800,
+                              alpha=0.95, edgecolors='#212121', linewidths=2.5)
         
         # Create mapping for visited nodes
         visited_order_map = {}
@@ -138,21 +195,20 @@ class GraphSearchVisualizer:
             labels[node] = label_text
         
         nx.draw_networkx_labels(self.graph, self.pos, labels, ax=ax,
-                               font_size=14, font_weight='bold', 
-                               font_color='white', font_family='Arial')
+                               font_size=15, font_weight='bold', 
+                               font_color='#FFFFFF', font_family='Arial')
         
-        # Draw visit numbers above visited nodes
+        # Draw visit numbers above visited nodes with improved design
         if visited_order_map:
             for node in visited_order_map.keys():
                 x, y = self.pos[node]
                 visit_num = visited_order_map[node]
-                circle = Circle((x, y + 0.4), 0.18, color='#D32F2F', fill=True, 
-                              zorder=5, edgecolor='white', linewidth=2)
+                circle = Circle((x, y + 0.45), 0.2, color='#E53935', fill=True, 
+                              zorder=5, edgecolor='#FFFFFF', linewidth=2.5)
                 ax.add_patch(circle)
-                ax.text(x, y + 0.4, str(visit_num), fontsize=11, fontweight='bold',
-                       color='white', ha='center', va='center', zorder=6)
-                ax.text(x + 0.3, y + 0.4, '✕', fontsize=18, fontweight='bold',
-                       color='#D32F2F', ha='center', va='center', zorder=6)
+                ax.text(x, y + 0.45, str(visit_num), fontsize=12, fontweight='bold',
+                       color='#FFFFFF', ha='center', va='center', zorder=6)
+                # Removed the X mark for cleaner design
         
         # Add legend
         legend_elements = []
@@ -177,13 +233,14 @@ class GraphSearchVisualizer:
         
         if legend_elements:
             ax.legend(handles=legend_elements, loc='upper left', 
-                     fontsize=10, framealpha=0.95, fancybox=True,
-                     shadow=True, edgecolor='#333333', facecolor='white')
+                     fontsize=11, framealpha=0.98, fancybox=True,
+                     shadow=True, edgecolor='#BDBDBD', facecolor='#FAFAFA',
+                     frameon=True, borderpad=0.8, labelspacing=0.8)
         
-        ax.set_title('🔍 Graph Search Visualizer', fontsize=20, fontweight='bold', 
-                    pad=25, color='#1976D2')
+        ax.set_title('Graph Search Visualization', fontsize=18, fontweight='600', 
+                    pad=20, color='#424242', fontfamily='Arial')
         ax.axis('off')
-        ax.set_facecolor('#FAFAFA')
+        ax.set_facecolor('#FFFFFF')
         
         plt.tight_layout()
         return fig
@@ -194,6 +251,10 @@ if 'visualizer' not in st.session_state:
     st.session_state.visited_order = []
     st.session_state.solution_path = []
     st.session_state.animation_running = False
+    st.session_state.animation_step = 0
+    st.session_state.animation_complete = False
+    st.session_state.forward_visited = set()
+    st.session_state.backward_visited = set()
 
 visualizer = st.session_state.visualizer
 
@@ -208,166 +269,273 @@ with st.sidebar:
     
     with col1:
         if st.button("🔍 DFS", use_container_width=True, type="primary"):
+            # Reset state when switching algorithms
+            st.session_state.visited_order = []
+            st.session_state.solution_path = []
+            st.session_state.forward_visited = set()
+            st.session_state.backward_visited = set()
             st.session_state.algorithm = "DFS"
             st.session_state.animation_running = True
+            st.session_state.animation_step = 0
+            st.session_state.animation_complete = False
+            if 'full_visited_order' in st.session_state:
+                del st.session_state['full_visited_order']
+            if 'full_solution_path' in st.session_state:
+                del st.session_state['full_solution_path']
+            st.session_state.auto_play = False
             st.rerun()
         
         if st.button("🔄 Bidirectional", use_container_width=True):
+            # Reset state when switching algorithms
+            st.session_state.visited_order = []
+            st.session_state.solution_path = []
+            st.session_state.forward_visited = set()
+            st.session_state.backward_visited = set()
             st.session_state.algorithm = "Bidirectional"
             st.session_state.animation_running = True
+            st.session_state.animation_step = 0
+            st.session_state.animation_complete = False
+            if 'full_visited_order' in st.session_state:
+                del st.session_state['full_visited_order']
+            if 'full_solution_path' in st.session_state:
+                del st.session_state['full_solution_path']
+            st.session_state.auto_play = False
             st.rerun()
     
     with col2:
         if st.button("🔍 BFS", use_container_width=True):
+            # Reset state when switching algorithms
+            st.session_state.visited_order = []
+            st.session_state.solution_path = []
+            st.session_state.forward_visited = set()
+            st.session_state.backward_visited = set()
             st.session_state.algorithm = "BFS"
             st.session_state.animation_running = True
+            st.session_state.animation_step = 0
+            st.session_state.animation_complete = False
+            if 'full_visited_order' in st.session_state:
+                del st.session_state['full_visited_order']
+            if 'full_solution_path' in st.session_state:
+                del st.session_state['full_solution_path']
+            st.session_state.auto_play = False
             st.rerun()
         
         if st.button("🔄 Reset", use_container_width=True):
             st.session_state.visited_order = []
             st.session_state.solution_path = []
+            st.session_state.forward_visited = set()
+            st.session_state.backward_visited = set()
             st.session_state.animation_running = False
+            st.session_state.animation_step = 0
+            st.session_state.animation_complete = False
+            if 'full_visited_order' in st.session_state:
+                del st.session_state['full_visited_order']
+            if 'full_solution_path' in st.session_state:
+                del st.session_state['full_solution_path']
+            st.session_state.auto_play = False
             st.rerun()
     
+    # Animation controls
+    if st.session_state.get('animation_running'):
+        st.markdown("---")
+        col_play, col_step, col_pause = st.columns(3)
+        with col_play:
+            if st.button("▶️ Auto Play", use_container_width=True):
+                st.session_state.auto_play = True
+                st.rerun()
+        with col_step:
+            if st.button("⏭️ Next Step", use_container_width=True):
+                st.session_state.auto_play = False
+                st.session_state.animation_step = st.session_state.get('animation_step', 0) + 1
+                st.rerun()
+        with col_pause:
+            if st.button("⏸️ Pause", use_container_width=True):
+                st.session_state.auto_play = False
+                st.rerun()
+    
     st.markdown("---")
-    st.info("👆 اختر خوارزمية البحث من الأزرار أعلاه")
+    st.info("👆 Select a search algorithm from the buttons above to visualize the graph traversal")
 
 # Main content area
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    # Run algorithm if selected
+    # Run algorithm if selected and not yet computed
     if st.session_state.get('algorithm') and st.session_state.animation_running:
-        algorithm = st.session_state.algorithm
-        st.session_state.animation_running = False
-        
-        if algorithm == "DFS":
-            def dfs(graph, start, goal):
-                visited = set()
-                path = []
-                solution_path = []
-                
-                def dfs_recursive(node, current_path):
-                    if node in visited:
-                        return False
-                    visited.add(node)
-                    path.append(node)
-                    current_path = current_path + [node]
-                    if node == goal:
-                        solution_path[:] = current_path[:]
-                        return True
-                    for neighbor in sorted(graph.neighbors(node)):
-                        if neighbor not in visited:
-                            if dfs_recursive(neighbor, current_path):
-                                return True
-                    return False
-                
-                dfs_recursive(start, [])
-                return path, solution_path
+        if 'full_visited_order' not in st.session_state:
+            algorithm = st.session_state.algorithm
             
-            visited_order, solution_path = dfs(visualizer.graph, visualizer.start_node, visualizer.goal_node)
-            st.session_state.visited_order = visited_order
-            st.session_state.solution_path = solution_path
-        
-        elif algorithm == "BFS":
-            def bfs(graph, start, goal):
-                queue = deque([(start, [start])])
-                visited = set([start])
-                path = [start]
-                
-                while queue:
-                    current, current_path = queue.popleft()
-                    if current == goal:
-                        return path, current_path
-                    for neighbor in sorted(graph.neighbors(current)):
-                        if neighbor not in visited:
-                            visited.add(neighbor)
-                            path.append(neighbor)
-                            queue.append((neighbor, current_path + [neighbor]))
-                return path, []
-            
-            visited_order, solution_path = bfs(visualizer.graph, visualizer.start_node, visualizer.goal_node)
-            st.session_state.visited_order = visited_order
-            st.session_state.solution_path = solution_path
-        
-        elif algorithm == "Bidirectional":
-            def bidirectional_search(graph, start, goal):
-                forward_queue = deque([(start, [start])])
-                forward_visited = {start: [start]}
-                forward_visited_set = {start}
-                
-                backward_queue = deque([(goal, [goal])])
-                backward_visited = {goal: [goal]}
-                backward_visited_set = {goal}
-                
-                intersection = None
-                forward_intersection_path = []
-                backward_intersection_path = []
-                
-                while forward_queue or backward_queue:
-                    if forward_queue:
-                        current, current_path = forward_queue.popleft()
-                        forward_visited_set.add(current)
-                        
-                        if current in backward_visited_set:
-                            intersection = current
-                            forward_intersection_path = current_path
-                            backward_intersection_path = backward_visited[current][::-1]
-                            break
-                        
-                        for neighbor in sorted(graph.neighbors(current)):
-                            if neighbor not in forward_visited:
-                                forward_visited[neighbor] = current_path + [neighbor]
-                                forward_visited_set.add(neighbor)
-                                forward_queue.append((neighbor, current_path + [neighbor]))
+            if algorithm == "DFS":
+                def dfs(graph, start, goal):
+                    visited = set()
+                    path = []
+                    solution_path = []
                     
-                    if backward_queue:
-                        current, current_path = backward_queue.popleft()
-                        backward_visited_set.add(current)
-                        
-                        if current in forward_visited_set:
-                            intersection = current
-                            forward_intersection_path = forward_visited[current]
-                            backward_intersection_path = current_path[::-1]
-                            break
-                        
-                        for neighbor in sorted(graph.neighbors(current)):
-                            if neighbor not in backward_visited:
-                                backward_visited[neighbor] = current_path + [neighbor]
-                                backward_visited_set.add(neighbor)
-                                backward_queue.append((neighbor, current_path + [neighbor]))
+                    def dfs_recursive(node, current_path):
+                        if node in visited:
+                            return False
+                        visited.add(node)
+                        path.append(node)
+                        current_path = current_path + [node]
+                        if node == goal:
+                            solution_path[:] = current_path[:]
+                            return True
+                        for neighbor in sorted(graph.neighbors(node)):
+                            if neighbor not in visited:
+                                if dfs_recursive(neighbor, current_path):
+                                    return True
+                        return False
+                    
+                    dfs_recursive(start, [])
+                    return path, solution_path
                 
-                if intersection:
-                    solution_path = forward_intersection_path[:-1] + backward_intersection_path
-                    visited_all = list(set(list(forward_visited_set) + list(backward_visited_set)))
-                    return visited_all, solution_path, forward_visited_set, backward_visited_set
-                
-                visited_all = list(set(list(forward_visited_set) + list(backward_visited_set)))
-                return visited_all, [], forward_visited_set, backward_visited_set
+                visited_order, solution_path = dfs(visualizer.graph, visualizer.start_node, visualizer.goal_node)
+                st.session_state.full_visited_order = visited_order
+                st.session_state.full_solution_path = solution_path
+                st.session_state.forward_visited = set()
+                st.session_state.backward_visited = set()
             
-            result = bidirectional_search(visualizer.graph, visualizer.start_node, visualizer.goal_node)
-            if len(result) == 4:
-                visited_order, solution_path, forward_visited, backward_visited = result
-                st.session_state.visited_order = visited_order
-                st.session_state.solution_path = solution_path
-                st.session_state.forward_visited = forward_visited
-                st.session_state.backward_visited = backward_visited
+            elif algorithm == "BFS":
+                def bfs(graph, start, goal):
+                    queue = deque([(start, [start])])
+                    visited = set([start])
+                    path = [start]
+                    
+                    while queue:
+                        current, current_path = queue.popleft()
+                        if current == goal:
+                            return path, current_path
+                        for neighbor in sorted(graph.neighbors(current)):
+                            if neighbor not in visited:
+                                visited.add(neighbor)
+                                path.append(neighbor)
+                                queue.append((neighbor, current_path + [neighbor]))
+                    return path, []
+                
+                visited_order, solution_path = bfs(visualizer.graph, visualizer.start_node, visualizer.goal_node)
+                st.session_state.full_visited_order = visited_order
+                st.session_state.full_solution_path = solution_path
+                st.session_state.forward_visited = set()
+                st.session_state.backward_visited = set()
+            
+            elif algorithm == "Bidirectional":
+                def bidirectional_search(graph, start, goal):
+                    forward_queue = deque([(start, [start])])
+                    forward_visited = {start: [start]}
+                    forward_visited_set = {start}
+                    
+                    backward_queue = deque([(goal, [goal])])
+                    backward_visited = {goal: [goal]}
+                    backward_visited_set = {goal}
+                    
+                    intersection = None
+                    forward_intersection_path = []
+                    backward_intersection_path = []
+                    
+                    while forward_queue or backward_queue:
+                        if forward_queue:
+                            current, current_path = forward_queue.popleft()
+                            forward_visited_set.add(current)
+                            
+                            if current in backward_visited_set:
+                                intersection = current
+                                forward_intersection_path = current_path
+                                backward_intersection_path = backward_visited[current][::-1]
+                                break
+                            
+                            for neighbor in sorted(graph.neighbors(current)):
+                                if neighbor not in forward_visited:
+                                    forward_visited[neighbor] = current_path + [neighbor]
+                                    forward_visited_set.add(neighbor)
+                                    forward_queue.append((neighbor, current_path + [neighbor]))
+                        
+                        if backward_queue:
+                            current, current_path = backward_queue.popleft()
+                            backward_visited_set.add(current)
+                            
+                            if current in forward_visited_set:
+                                intersection = current
+                                forward_intersection_path = forward_visited[current]
+                                backward_intersection_path = current_path[::-1]
+                                break
+                            
+                            for neighbor in sorted(graph.neighbors(current)):
+                                if neighbor not in backward_visited:
+                                    backward_visited[neighbor] = current_path + [neighbor]
+                                    backward_visited_set.add(neighbor)
+                                    backward_queue.append((neighbor, current_path + [neighbor]))
+                    
+                    if intersection:
+                        solution_path = forward_intersection_path[:-1] + backward_intersection_path
+                        visited_all = list(set(list(forward_visited_set) + list(backward_visited_set)))
+                        return visited_all, solution_path, forward_visited_set, backward_visited_set
+                    
+                    visited_all = list(set(list(forward_visited_set) + list(backward_visited_set)))
+                    return visited_all, [], forward_visited_set, backward_visited_set
+                
+                result = bidirectional_search(visualizer.graph, visualizer.start_node, visualizer.goal_node)
+                if len(result) == 4:
+                    visited_order, solution_path, forward_visited, backward_visited = result
+                    st.session_state.full_visited_order = visited_order
+                    st.session_state.full_solution_path = solution_path
+                    st.session_state.forward_visited = forward_visited
+                    st.session_state.backward_visited = backward_visited
+                else:
+                    st.session_state.full_visited_order = []
+                    st.session_state.full_solution_path = []
+        
+        # Animate step by step
+        full_visited_order = st.session_state.get('full_visited_order', [])
+        animation_step = st.session_state.get('animation_step', 0)
+        
+        if full_visited_order:
+            # Show progress up to current step
+            current_visited = full_visited_order[:animation_step + 1]
+            current_node = full_visited_order[animation_step] if animation_step < len(full_visited_order) else None
+            
+            st.session_state.visited_order = current_visited
+            
+            # Check if animation is complete
+            if animation_step >= len(full_visited_order) - 1:
+                st.session_state.animation_complete = True
+                st.session_state.solution_path = st.session_state.get('full_solution_path', [])
+                # Auto-play continues to show solution path
+                if st.session_state.get('auto_play', False):
+                    time.sleep(0.5)
+                    if animation_step < len(full_visited_order) + 5:  # Extra steps for solution display
+                        st.session_state.animation_step += 1
+                        st.rerun()
             else:
-                st.session_state.visited_order = []
-                st.session_state.solution_path = []
+                # Auto-play mode
+                if st.session_state.get('auto_play', False):
+                    time.sleep(0.6)
+                    st.session_state.animation_step += 1
+                    st.rerun()
     
-    # Draw graph
+    # Draw graph with current animation state
     visited_order = st.session_state.get('visited_order', [])
     solution_path = st.session_state.get('solution_path', [])
     forward_visited = st.session_state.get('forward_visited', set())
     backward_visited = st.session_state.get('backward_visited', set())
     
-    visited_set = set(visited_order) if visited_order else set()
+    # For bidirectional, show current state
+    if forward_visited or backward_visited:
+        visited_set = None
+    else:
+        visited_set = set(visited_order) if visited_order else set()
+    
+    # Get current node for highlighting
+    current_node = None
+    if visited_order and st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
+        animation_step = st.session_state.get('animation_step', 0)
+        if animation_step < len(visited_order):
+            current_node = visited_order[animation_step]
     
     fig = visualizer.draw_graph(
-        highlight_visited=visited_set if not forward_visited else None,
-        highlight_path=solution_path,
-        highlight_path_edges=solution_path if solution_path else None,
+        highlight_visited=visited_set,
+        highlight_path=solution_path if st.session_state.get('animation_complete', False) else [],
+        highlight_current=current_node,
+        highlight_path_edges=solution_path if (solution_path and st.session_state.get('animation_complete', False)) else None,
         visited_order_list=visited_order,
         forward_visited=forward_visited if forward_visited else None,
         backward_visited=backward_visited if backward_visited else None
@@ -429,5 +597,12 @@ with col2:
 
 # Footer
 st.markdown("---")
-st.markdown("**Graph Search Visualizer** - Created with ❤️ using Streamlit")
+st.markdown(
+    "<div style='text-align: center; color: #757575; padding: 1rem 0;'>"
+    "<strong>Graph Search Visualizer</strong> | "
+    "Interactive Visualization of Graph Search Algorithms | "
+    "Built with Streamlit"
+    "</div>", 
+    unsafe_allow_html=True
+)
 
