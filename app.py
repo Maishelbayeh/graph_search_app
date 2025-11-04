@@ -292,18 +292,42 @@ class GraphSearchVisualizer:
                                font_size=15, font_weight='bold', 
                                font_color='#FFFFFF', font_family='Arial')
         
-        # Draw visit numbers above visited nodes with improved positioning
+        # Draw visit numbers above visited nodes with improved professional design
         if visited_order_map:
             for node in visited_order_map.keys():
                 x, y = self.pos[node]
                 visit_num = visited_order_map[node]
-                # Position visit number higher above node to avoid overlap
-                # Adjust based on node size (nodes are ~0.5 radius, so position at 0.7 units above)
-                circle = Circle((x, y + 0.7), 0.18, color='#E53935', fill=True, 
-                              zorder=5, edgecolor='#FFFFFF', linewidth=2)
-                ax.add_patch(circle)
-                ax.text(x, y + 0.7, str(visit_num), fontsize=11, fontweight='bold',
-                       color='#FFFFFF', ha='center', va='center', zorder=6)
+                
+                # Calculate optimal position above node (avoid overlap with labels)
+                # Position at 0.75 units above node center for better spacing
+                badge_y = y + 0.75
+                
+                # Create a professional badge design
+                # Outer circle - white border
+                outer_circle = Circle((x, badge_y), 0.22, color='#FFFFFF', fill=True, 
+                                     zorder=5, linewidth=0, alpha=0.95)
+                ax.add_patch(outer_circle)
+                
+                # Inner circle - colored badge
+                inner_circle = Circle((x, badge_y), 0.19, color='#E53935', fill=True, 
+                                     zorder=6, linewidth=0)
+                ax.add_patch(inner_circle)
+                
+                # Add subtle shadow effect
+                shadow_circle = Circle((x + 0.02, badge_y - 0.02), 0.19, 
+                                     color='#B71C1C', fill=True, 
+                                     zorder=4, alpha=0.3)
+                ax.add_patch(shadow_circle)
+                
+                # Draw number text with better styling
+                ax.text(x, badge_y, str(visit_num), fontsize=12, fontweight='bold',
+                       color='#FFFFFF', ha='center', va='center', zorder=7,
+                       family='Arial', style='normal')
+                
+                # Add a subtle connecting line to node for better visual connection
+                ax.plot([x, x], [y + 0.45, badge_y - 0.19], 
+                       color='#BDBDBD', linewidth=1.5, alpha=0.4, 
+                       linestyle='--', zorder=3, dashes=(3, 2))
         
         # Add legend
         legend_elements = []
@@ -614,23 +638,15 @@ with col1:
                 st.session_state.animation_complete = True
                 st.session_state.solution_path = st.session_state.get('full_solution_path', [])
                 st.session_state.current_animation_node = None
-                # Auto-play continues to show solution path
-                if st.session_state.get('auto_play', False):
-                    time.sleep(0.8)
-                    if animation_step < len(full_visited_order) + 3:  # Extra steps for solution display
-                        st.session_state.animation_step += 1
-                        st.rerun()
             else:
                 # Auto-play mode - start automatically
                 if not st.session_state.get('auto_play_initialized', False):
                     st.session_state.auto_play = True
                     st.session_state.auto_play_initialized = True
                 
-                # Auto-play mode
-                if st.session_state.get('auto_play', False):
-                    time.sleep(0.8)  # Slower for better visibility
-                    st.session_state.animation_step += 1
-                    st.rerun()
+    
+    # Create graph placeholder for animation
+    graph_placeholder = st.empty()
     
     # Draw graph with current animation state
     visited_order = st.session_state.get('visited_order', [])
@@ -653,13 +669,19 @@ with col1:
         visited_set = visited_set - {current_node}
     
     # Show status message during animation
+    status_placeholder = st.empty()
     if st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
         animation_step = st.session_state.get('animation_step', 0)
         full_visited_order = st.session_state.get('full_visited_order', [])
         if current_node is not None and animation_step < len(full_visited_order):
             node_letter = visualizer.node_to_letter.get(current_node, str(current_node))
-            st.info(f"🔍 **Exploring Node {node_letter}** (Node {current_node}) - Step {animation_step + 1}/{len(full_visited_order)}")
+            status_placeholder.info(f"🔍 **Exploring Node {node_letter}** (Node {current_node}) - Step {animation_step + 1}/{len(full_visited_order)}")
+        else:
+            status_placeholder.empty()
+    else:
+        status_placeholder.empty()
     
+    # Draw and display graph
     fig = visualizer.draw_graph(
         highlight_visited=visited_set,
         highlight_path=solution_path if st.session_state.get('animation_complete', False) else [],
@@ -670,8 +692,20 @@ with col1:
         backward_visited=backward_visited if backward_visited else None
     )
     
-    # Display graph with responsive container
-    st.pyplot(fig, use_container_width=True, clear_figure=True)
+    # Display graph in placeholder for smooth animation updates
+    with graph_placeholder.container():
+        st.pyplot(fig, use_container_width=True, clear_figure=True)
+    
+    # Handle auto-play animation after graph is shown
+    if st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
+        full_visited_order = st.session_state.get('full_visited_order', [])
+        animation_step = st.session_state.get('animation_step', 0)
+        
+        if st.session_state.get('auto_play', False) and animation_step < len(full_visited_order) - 1:
+            # Advance to next step after showing current frame
+            time.sleep(1.2)  # Visible delay
+            st.session_state.animation_step += 1
+            st.rerun()
     
     # Algorithm info
     if visited_order:
