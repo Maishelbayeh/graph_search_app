@@ -7,40 +7,49 @@ import time
 from collections import deque
 import heapq
 
-# Page config
+# Page config - Responsive
 st.set_page_config(
     page_title="Graph Search Visualizer",
     page_icon="🔍",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items=None
 )
 
 # Professional CSS styling for AI Master's level design
 st.markdown("""
     <style>
-    /* Main Header */
+    /* Responsive Design - Base Styles */
+    * {
+        box-sizing: border-box;
+    }
+    
+    /* Main Header - Responsive */
     .main-header {
-        font-size: 2.8rem;
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
         font-weight: 700;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         text-align: center;
-        padding: 1.5rem 0;
-        margin-bottom: 1rem;
+        padding: clamp(0.8rem, 2vw, 1.5rem) 0;
+        margin-bottom: clamp(0.5rem, 2vw, 1rem);
         letter-spacing: -0.5px;
     }
     
-    /* Button Styling */
+    /* Button Styling - Responsive */
     .stButton>button {
         width: 100%;
-        height: 3.2rem;
-        font-size: 1.1rem;
+        height: clamp(2.5rem, 5vw, 2.8rem);
+        font-size: clamp(0.85rem, 2vw, 1rem);
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.3s ease;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .stButton>button:hover {
@@ -48,45 +57,98 @@ st.markdown("""
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
+    /* Sidebar Header Styling - Responsive */
+    .sidebar .sidebar-content h2 {
+        font-size: clamp(1.2rem, 3vw, 1.5rem);
+        margin-bottom: clamp(0.5rem, 2vw, 1rem);
+    }
+    
+    /* Sidebar Subheader Styling - Responsive */
+    .sidebar .sidebar-content h3 {
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        margin-top: clamp(0.5rem, 2vw, 1rem);
+        margin-bottom: clamp(0.3rem, 1vw, 0.5rem);
+    }
+    
     /* Sidebar Styling */
     .css-1d391kg {
         background-color: #f8f9fa;
     }
     
-    /* Main Container */
+    /* Main Container - Responsive Padding */
     .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+        padding-top: clamp(1rem, 3vw, 2rem);
+        padding-bottom: clamp(1rem, 3vw, 2rem);
+        padding-left: clamp(1rem, 3vw, 2rem);
+        padding-right: clamp(1rem, 3vw, 2rem);
     }
     
-    /* Info Boxes */
+    /* Info Boxes - Responsive */
     .stInfo {
         background-color: #e8f4f8;
         border-left: 4px solid #2196F3;
-        padding: 1rem;
+        padding: clamp(0.7rem, 2vw, 1rem);
         border-radius: 4px;
+        font-size: clamp(0.85rem, 2vw, 1rem);
     }
     
-    /* Success Messages */
+    /* Success Messages - Responsive */
     .stSuccess {
         background-color: #e8f5e9;
         border-left: 4px solid #4caf50;
-        padding: 1rem;
+        padding: clamp(0.7rem, 2vw, 1rem);
         border-radius: 4px;
+        font-size: clamp(0.85rem, 2vw, 1rem);
     }
     
-    /* Code Blocks */
+    /* Code Blocks - Responsive */
     .stCodeBlock {
         background-color: #f5f5f5;
         border-radius: 6px;
-        padding: 1rem;
+        padding: clamp(0.7rem, 2vw, 1rem);
+        font-size: clamp(0.75rem, 1.8vw, 0.9rem);
     }
     
-    /* Footer */
+    /* Footer - Responsive */
     footer {
         text-align: center;
         color: #666;
-        padding: 1rem 0;
+        padding: clamp(0.5rem, 2vw, 1rem) 0;
+        font-size: clamp(0.8rem, 2vw, 1rem);
+    }
+    
+    /* Responsive Columns - Stack on Mobile */
+    @media screen and (max-width: 768px) {
+        .main .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .main-header {
+            font-size: 1.8rem;
+            padding: 1rem 0;
+        }
+        
+        /* Make graph responsive */
+        .element-container img {
+            max-width: 100%;
+            height: auto;
+        }
+    }
+    
+    /* Tablet Adjustments */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .main-header {
+            font-size: 2.2rem;
+        }
+    }
+    
+    /* Large Screen Optimizations */
+    @media screen and (min-width: 1920px) {
+        .main .block-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -127,7 +189,11 @@ class GraphSearchVisualizer:
                    highlight_current=None, highlight_path_edges=None,
                    visited_order_list=None, forward_visited=None, backward_visited=None):
         """Draw the graph with optional highlighting"""
-        fig, ax = plt.subplots(figsize=(12, 8))
+        # Responsive figure size - adapts to screen
+        import matplotlib.pyplot as plt
+        # Use larger figure for better visibility on all screens
+        fig, ax = plt.subplots(figsize=(14, 9), dpi=100)
+        fig.patch.set_facecolor('white')
         
         # Draw solution path edges first with enhanced styling
         if highlight_path_edges:
@@ -143,31 +209,59 @@ class GraphSearchVisualizer:
                               connectionstyle='arc3,rad=0.1')
         
         # Draw nodes with professional color scheme
+        # Priority: current > path > start/goal > intersection > forward/backward > visited > unvisited
         node_colors = []
+        node_sizes = []
+        node_edgewidths = []
+        
         for node in self.graph.nodes():
-            if node == self.start_node:
-                node_colors.append('#FF6B35')  # Vibrant orange for start
-            elif node == self.goal_node:
-                node_colors.append('#FF6B35')  # Vibrant orange for goal
+            if highlight_current and node == highlight_current:
+                # Current node being explored - make it stand out
+                node_colors.append('#FFC107')  # Bright amber
+                node_sizes.append(3200)  # Larger size
+                node_edgewidths.append(4)  # Thicker border
+            elif highlight_path and node in highlight_path:
+                # Solution path nodes
+                node_colors.append('#F44336')  # Red
+                node_sizes.append(2800)
+                node_edgewidths.append(3)
+            elif node == self.start_node or node == self.goal_node:
+                # Start and goal nodes
+                node_colors.append('#FF6B35')  # Vibrant orange
+                node_sizes.append(2800)
+                node_edgewidths.append(3)
             elif (forward_visited and node in forward_visited and 
                   backward_visited and node in backward_visited):
-                node_colors.append('#9C27B0')  # Purple for intersection
+                # Intersection in bidirectional search
+                node_colors.append('#9C27B0')  # Purple
+                node_sizes.append(2800)
+                node_edgewidths.append(3)
             elif forward_visited and node in forward_visited:
-                node_colors.append('#2196F3')  # Blue for forward search
+                # Forward search nodes
+                node_colors.append('#2196F3')  # Blue
+                node_sizes.append(2800)
+                node_edgewidths.append(2.5)
             elif backward_visited and node in backward_visited:
-                node_colors.append('#4CAF50')  # Green for backward search
+                # Backward search nodes
+                node_colors.append('#4CAF50')  # Green
+                node_sizes.append(2800)
+                node_edgewidths.append(2.5)
             elif highlight_visited and node in highlight_visited:
-                node_colors.append('#66BB6A')  # Light green for visited
-            elif highlight_current and node == highlight_current:
-                node_colors.append('#FFC107')  # Amber for current
-            elif highlight_path and node in highlight_path:
-                node_colors.append('#F44336')  # Red for solution path
+                # Visited nodes
+                node_colors.append('#66BB6A')  # Light green
+                node_sizes.append(2800)
+                node_edgewidths.append(2.5)
             else:
-                node_colors.append('#90CAF9')  # Light blue for unvisited
+                # Unvisited nodes
+                node_colors.append('#90CAF9')  # Light blue
+                node_sizes.append(2800)
+                node_edgewidths.append(2.5)
         
-        nx.draw_networkx_nodes(self.graph, self.pos, ax=ax,
-                              node_color=node_colors, node_size=2800,
-                              alpha=0.95, edgecolors='#212121', linewidths=2.5)
+        # Draw nodes with varying sizes and edge widths
+        for i, node in enumerate(self.graph.nodes()):
+            nx.draw_networkx_nodes(self.graph, self.pos, ax=ax, nodelist=[node],
+                                  node_color=[node_colors[i]], node_size=node_sizes[i],
+                                  alpha=0.95, edgecolors='#212121', linewidths=node_edgewidths[i])
         
         # Create mapping for visited nodes
         visited_order_map = {}
@@ -198,17 +292,18 @@ class GraphSearchVisualizer:
                                font_size=15, font_weight='bold', 
                                font_color='#FFFFFF', font_family='Arial')
         
-        # Draw visit numbers above visited nodes with improved design
+        # Draw visit numbers above visited nodes with improved positioning
         if visited_order_map:
             for node in visited_order_map.keys():
                 x, y = self.pos[node]
                 visit_num = visited_order_map[node]
-                circle = Circle((x, y + 0.45), 0.2, color='#E53935', fill=True, 
-                              zorder=5, edgecolor='#FFFFFF', linewidth=2.5)
+                # Position visit number higher above node to avoid overlap
+                # Adjust based on node size (nodes are ~0.5 radius, so position at 0.7 units above)
+                circle = Circle((x, y + 0.7), 0.18, color='#E53935', fill=True, 
+                              zorder=5, edgecolor='#FFFFFF', linewidth=2)
                 ax.add_patch(circle)
-                ax.text(x, y + 0.45, str(visit_num), fontsize=12, fontweight='bold',
+                ax.text(x, y + 0.7, str(visit_num), fontsize=11, fontweight='bold',
                        color='#FFFFFF', ha='center', va='center', zorder=6)
-                # Removed the X mark for cleaner design
         
         # Add legend
         legend_elements = []
@@ -261,103 +356,117 @@ visualizer = st.session_state.visualizer
 # Header
 st.markdown('<div class="main-header">🔍 Graph Search Visualizer</div>', unsafe_allow_html=True)
 
-# Sidebar for controls
+# Sidebar for controls with improved design
 with st.sidebar:
     st.header("🎮 Controls")
     
-    col1, col2 = st.columns(2)
+    # Algorithm selection buttons - single column to prevent wrapping
+    st.subheader("Algorithms", divider="gray")
     
-    with col1:
-        if st.button("🔍 DFS", use_container_width=True, type="primary"):
-            # Reset state when switching algorithms
-            st.session_state.visited_order = []
-            st.session_state.solution_path = []
-            st.session_state.forward_visited = set()
-            st.session_state.backward_visited = set()
-            st.session_state.algorithm = "DFS"
-            st.session_state.animation_running = True
-            st.session_state.animation_step = 0
-            st.session_state.animation_complete = False
-            if 'full_visited_order' in st.session_state:
-                del st.session_state['full_visited_order']
-            if 'full_solution_path' in st.session_state:
-                del st.session_state['full_solution_path']
-            st.session_state.auto_play = False
-            st.rerun()
-        
-        if st.button("🔄 Bidirectional", use_container_width=True):
-            # Reset state when switching algorithms
-            st.session_state.visited_order = []
-            st.session_state.solution_path = []
-            st.session_state.forward_visited = set()
-            st.session_state.backward_visited = set()
-            st.session_state.algorithm = "Bidirectional"
-            st.session_state.animation_running = True
-            st.session_state.animation_step = 0
-            st.session_state.animation_complete = False
-            if 'full_visited_order' in st.session_state:
-                del st.session_state['full_visited_order']
-            if 'full_solution_path' in st.session_state:
-                del st.session_state['full_solution_path']
-            st.session_state.auto_play = False
-            st.rerun()
+    if st.button("🔍 DFS", use_container_width=True, type="primary"):
+        # Reset state when switching algorithms
+        st.session_state.visited_order = []
+        st.session_state.solution_path = []
+        st.session_state.forward_visited = set()
+        st.session_state.backward_visited = set()
+        st.session_state.algorithm = "DFS"
+        st.session_state.animation_running = True
+        st.session_state.animation_step = 0
+        st.session_state.animation_complete = False
+        st.session_state.current_animation_node = None
+        if 'full_visited_order' in st.session_state:
+            del st.session_state['full_visited_order']
+        if 'full_solution_path' in st.session_state:
+            del st.session_state['full_solution_path']
+        st.session_state.auto_play = False
+        st.session_state.auto_play_initialized = False
+        st.rerun()
     
-    with col2:
-        if st.button("🔍 BFS", use_container_width=True):
-            # Reset state when switching algorithms
-            st.session_state.visited_order = []
-            st.session_state.solution_path = []
-            st.session_state.forward_visited = set()
-            st.session_state.backward_visited = set()
-            st.session_state.algorithm = "BFS"
-            st.session_state.animation_running = True
-            st.session_state.animation_step = 0
-            st.session_state.animation_complete = False
-            if 'full_visited_order' in st.session_state:
-                del st.session_state['full_visited_order']
-            if 'full_solution_path' in st.session_state:
-                del st.session_state['full_solution_path']
-            st.session_state.auto_play = False
-            st.rerun()
-        
-        if st.button("🔄 Reset", use_container_width=True):
-            st.session_state.visited_order = []
-            st.session_state.solution_path = []
-            st.session_state.forward_visited = set()
-            st.session_state.backward_visited = set()
-            st.session_state.animation_running = False
-            st.session_state.animation_step = 0
-            st.session_state.animation_complete = False
-            if 'full_visited_order' in st.session_state:
-                del st.session_state['full_visited_order']
-            if 'full_solution_path' in st.session_state:
-                del st.session_state['full_solution_path']
-            st.session_state.auto_play = False
-            st.rerun()
+    if st.button("🔍 BFS", use_container_width=True):
+        # Reset state when switching algorithms
+        st.session_state.visited_order = []
+        st.session_state.solution_path = []
+        st.session_state.forward_visited = set()
+        st.session_state.backward_visited = set()
+        st.session_state.algorithm = "BFS"
+        st.session_state.animation_running = True
+        st.session_state.animation_step = 0
+        st.session_state.animation_complete = False
+        st.session_state.current_animation_node = None
+        if 'full_visited_order' in st.session_state:
+            del st.session_state['full_visited_order']
+        if 'full_solution_path' in st.session_state:
+            del st.session_state['full_solution_path']
+        st.session_state.auto_play = False
+        st.session_state.auto_play_initialized = False
+        st.rerun()
     
-    # Animation controls
+    if st.button("🔄 Bidirectional", use_container_width=True):
+        # Reset state when switching algorithms
+        st.session_state.visited_order = []
+        st.session_state.solution_path = []
+        st.session_state.forward_visited = set()
+        st.session_state.backward_visited = set()
+        st.session_state.algorithm = "Bidirectional"
+        st.session_state.animation_running = True
+        st.session_state.animation_step = 0
+        st.session_state.animation_complete = False
+        st.session_state.current_animation_node = None
+        if 'full_visited_order' in st.session_state:
+            del st.session_state['full_visited_order']
+        if 'full_solution_path' in st.session_state:
+            del st.session_state['full_solution_path']
+        st.session_state.auto_play = False
+        st.session_state.auto_play_initialized = False
+        st.rerun()
+    
+    # Animation controls section
     if st.session_state.get('animation_running'):
         st.markdown("---")
-        col_play, col_step, col_pause = st.columns(3)
+        st.subheader("Animation", divider="gray")
+        
+        # Use two columns for better layout
+        col_play, col_step = st.columns(2)
         with col_play:
-            if st.button("▶️ Auto Play", use_container_width=True):
+            if st.button("▶️ Play", use_container_width=True):
                 st.session_state.auto_play = True
                 st.rerun()
         with col_step:
-            if st.button("⏭️ Next Step", use_container_width=True):
+            if st.button("⏭️ Step", use_container_width=True):
                 st.session_state.auto_play = False
                 st.session_state.animation_step = st.session_state.get('animation_step', 0) + 1
                 st.rerun()
-        with col_pause:
-            if st.button("⏸️ Pause", use_container_width=True):
-                st.session_state.auto_play = False
-                st.rerun()
+        
+        if st.button("⏸️ Pause", use_container_width=True):
+            st.session_state.auto_play = False
+            st.rerun()
     
+    # Reset button
     st.markdown("---")
-    st.info("👆 Select a search algorithm from the buttons above to visualize the graph traversal")
+    if st.button("🔄 Reset", use_container_width=True, type="secondary"):
+        st.session_state.visited_order = []
+        st.session_state.solution_path = []
+        st.session_state.forward_visited = set()
+        st.session_state.backward_visited = set()
+        st.session_state.animation_running = False
+        st.session_state.animation_step = 0
+        st.session_state.animation_complete = False
+        st.session_state.current_animation_node = None
+        if 'full_visited_order' in st.session_state:
+            del st.session_state['full_visited_order']
+        if 'full_solution_path' in st.session_state:
+            del st.session_state['full_solution_path']
+        st.session_state.auto_play = False
+        st.session_state.auto_play_initialized = False
+        st.rerun()
+    
+    # Info section
+    st.markdown("---")
+    st.info("👆 Select an algorithm to visualize graph traversal")
 
-# Main content area
-col1, col2 = st.columns([2, 1])
+# Main content area - Responsive layout
+# On mobile, stack vertically; on larger screens, use side-by-side
+col1, col2 = st.columns([2, 1], gap="medium")
 
 with col1:
     # Run algorithm if selected and not yet computed
@@ -490,25 +599,36 @@ with col1:
         
         if full_visited_order:
             # Show progress up to current step
-            current_visited = full_visited_order[:animation_step + 1]
-            current_node = full_visited_order[animation_step] if animation_step < len(full_visited_order) else None
+            if animation_step < len(full_visited_order):
+                current_visited = full_visited_order[:animation_step + 1]
+                current_node = full_visited_order[animation_step]
+            else:
+                current_visited = full_visited_order
+                current_node = None
             
             st.session_state.visited_order = current_visited
+            st.session_state.current_animation_node = current_node
             
             # Check if animation is complete
             if animation_step >= len(full_visited_order) - 1:
                 st.session_state.animation_complete = True
                 st.session_state.solution_path = st.session_state.get('full_solution_path', [])
+                st.session_state.current_animation_node = None
                 # Auto-play continues to show solution path
                 if st.session_state.get('auto_play', False):
-                    time.sleep(0.5)
-                    if animation_step < len(full_visited_order) + 5:  # Extra steps for solution display
+                    time.sleep(0.8)
+                    if animation_step < len(full_visited_order) + 3:  # Extra steps for solution display
                         st.session_state.animation_step += 1
                         st.rerun()
             else:
+                # Auto-play mode - start automatically
+                if not st.session_state.get('auto_play_initialized', False):
+                    st.session_state.auto_play = True
+                    st.session_state.auto_play_initialized = True
+                
                 # Auto-play mode
                 if st.session_state.get('auto_play', False):
-                    time.sleep(0.6)
+                    time.sleep(0.8)  # Slower for better visibility
                     st.session_state.animation_step += 1
                     st.rerun()
     
@@ -522,14 +642,23 @@ with col1:
     if forward_visited or backward_visited:
         visited_set = None
     else:
+        # Show visited nodes (excluding current node for clarity)
         visited_set = set(visited_order) if visited_order else set()
     
-    # Get current node for highlighting
-    current_node = None
-    if visited_order and st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
+    # Get current node for highlighting - use stored value
+    current_node = st.session_state.get('current_animation_node', None)
+    
+    # If we have a current node in animation, remove it from visited set to show it separately
+    if current_node is not None and visited_set:
+        visited_set = visited_set - {current_node}
+    
+    # Show status message during animation
+    if st.session_state.get('animation_running') and not st.session_state.get('animation_complete', False):
         animation_step = st.session_state.get('animation_step', 0)
-        if animation_step < len(visited_order):
-            current_node = visited_order[animation_step]
+        full_visited_order = st.session_state.get('full_visited_order', [])
+        if current_node is not None and animation_step < len(full_visited_order):
+            node_letter = visualizer.node_to_letter.get(current_node, str(current_node))
+            st.info(f"🔍 **Exploring Node {node_letter}** (Node {current_node}) - Step {animation_step + 1}/{len(full_visited_order)}")
     
     fig = visualizer.draw_graph(
         highlight_visited=visited_set,
@@ -541,7 +670,8 @@ with col1:
         backward_visited=backward_visited if backward_visited else None
     )
     
-    st.pyplot(fig)
+    # Display graph with responsive container
+    st.pyplot(fig, use_container_width=True, clear_figure=True)
     
     # Algorithm info
     if visited_order:
